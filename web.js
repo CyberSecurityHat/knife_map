@@ -1,6 +1,7 @@
 const express = require('express');
 const fs = require('fs');
 const axios = require('axios');
+const bodyParser = require('body-parser');
 require('dotenv').config();
 
 const { sequelize } = require("./models");
@@ -16,6 +17,7 @@ const filePath = path.join(__dirname, 'data/coordinate.json');
 const port = 8001;
 
 app.use(express.static('public'));
+app.use(bodyParser.json());
 
 app.get('/', (req, res) => {
   const data = JSON.parse(fs.readFileSync(filePath, 'utf8'));
@@ -31,12 +33,16 @@ app.get('/report', (req, res) => {
 })
 
 app.post('/report', async (req, res) => {
+  const clientIP = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
   const { option, location, year, month, day, sourceUrl } = req.body;
   const date = `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+
+  console.log(clientIP);
 
   try {
     // Create a new Report instance
     report.create({
+      ipAddress: clientIP,
       option: option,
       location: location,
       date: date,

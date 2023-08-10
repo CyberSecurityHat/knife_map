@@ -11,11 +11,15 @@ module.exports = class report extends Sequelize.Model {
           primaryKey: true,
           autoIncrement: true,
         },
+        ipAddress: {
+          type: Sequelize.STRING,
+          allowNull: false,
+        },
         option: {
           type: Sequelize.STRING,
           allowNull: false,
         },
-        location: {
+        location: { //나중에 unique로 중복 예외 처리 해야함 백엔드 포함
           type: Sequelize.STRING,
           allowNull: false,
         },
