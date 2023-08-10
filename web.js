@@ -40,7 +40,6 @@ app.post('/report', async (req, res) => {
   console.log(clientIP);
 
   try {
-    // Create a new Report instance
     report.create({
       ipAddress: clientIP,
       option: option,

@@ -40,7 +40,7 @@
         </table>
     </div>
 
-    <!-- script -->
+    <!-- script map -->
     <script>
         const encodedData = '<%= Buffer.from(JSON.stringify(coordinates)).toString("base64") %>';
         const coordinates = JSON.parse(atob(encodedData));
@@ -81,7 +81,6 @@
 
         navigator.geolocation.getCurrentPosition(accessToGeo);
 
-        // Event listener for table rows
         document.getElementById('locationTable').addEventListener('click', function(event) {
             const target = event.target;
             if (target && (target.nodeName === 'TD' || target.nodeName === 'TH')) {

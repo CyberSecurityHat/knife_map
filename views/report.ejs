@@ -69,7 +69,6 @@
     const daySelect = document.getElementById('day');
     const currentYear = new Date().getFullYear();
 
-    // Populate year dropdown
     for (let i = 2023; i <= 2100; i++) {
         const option = document.createElement('option');
         option.value = i;
@@ -77,7 +76,6 @@
         yearSelect.appendChild(option);
     }
 
-    // Populate month dropdown
     for (let i = 1; i <= 12; i++) {
         const option = document.createElement('option');
         option.value = i;
@@ -85,7 +83,6 @@
         monthSelect.appendChild(option);
     }
 
-    // Populate day dropdown
     function populateDays(month) {
         daySelect.innerHTML = '';
         let days = 31;
