@@ -6,6 +6,8 @@ require('dotenv').config();
 
 const { sequelize } = require("./models");
 const report = require("./models/report");
+const warnung = require("./models/warnung");
+const seed = require('./seed');
 
 const app = express();
 const path = require('path');
@@ -14,6 +16,24 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
 const filePath = path.join(__dirname, 'data/coordinate.json');
+
+(async () => {
+    const coordinates = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+    const count = await warnung.count();
+    if (count === 0) {
+        for (const coord of coordinates) {
+            if (coord.latitude && coord.longitude) {
+                await warnung.create({
+                    address: coord.address,
+                    latitude: coord.latitude,
+                    longitude: coord.longitude,
+                    date: coord.date
+                });
+            }
+        }
+        console.log("Coordinates seeded successfully!");
+    }
+})();
 
 const port = 8001;
 
@@ -93,3 +113,15 @@ sequelize.sync({force: false})
     .catch((err) => {
         console.error(err);
     });
+// Route to provide coordinates data in JSON format
+app.get('/coordinates-data', async (req, res) => {
+    try {
+        const data = await warnung.findAll();
+        res.json(data);
+    } catch (error) {
+        console.error("Error fetching data:", error);
+        res.status(500).send("Internal Server Error");
+    }
+});
+
+seed();

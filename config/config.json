@@ -14,10 +14,10 @@
     "dialect": "mysql"
   },
   "production": {
-    "username": "root",
-    "password": "root",
-    "database": "knifemap_production",
-    "host": "127.0.0.1",
+    "username": "cybersecurityhat",
+    "password": "rhkddnsgusgh1!",
+    "database": "cybersecurityhat",
+    "host": "knifemap.cafe24app.com",
     "dialect": "mysql"
   }
 }

@@ -1,107 +1,110 @@
 <!DOCTYPE html>
 <html lang="ko">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>흉기난동 예고 알림 맵</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.js"></script>
-<link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
 </head>
 
 <body>
 
-    <div id="map" style="height: 500px; width: 1900px; margin-left: auto; margin-right: auto;"></div>
+    <div id="map" style="height: 930px; width: 1900px; margin-left: auto; margin-right: auto;"></div>
 
-        <div class="row justify-content-end" style="margin-top: 1rem; margin-right: 1rem;">
-            <div class="col-auto">
-                <button type="button" id="moveButton" class="btn btn-primary">제보하기</button>
-            </div>
+    <div class="row justify-content-end" style="margin-top: 1rem; margin-right: 1rem;">
+        <div class="col-auto">
+            <button type="button" id="moveButton" class="btn btn-primary">제보하기</button>
         </div>
+    </div>
 
     <div class="table">
         <table id="locationTable" class="table table-striped" style="width: 1900px; margin-top: 1rem; margin-left: auto; margin-right: auto;">
             <thead>
-            <tr>
-                <th>주소</th>
-                <th>날짜</th>
-            </tr>
+                <tr>
+                    <th>주소</th>
+                    <th>날짜</th>
+                </tr>
             </thead>
             <tbody>
-            <% coordinates.forEach(coord => { %>
-                <tr>
-                    <td><%= coord.address %></td>
-                    <td><%= coord.date %></td>
-                    <td hidden><%= coord.latitude %></td>
-                    <td hidden><%= coord.longitude %></td>
-                </tr>
-            <% }); %>
+                <% coordinates.forEach(coord => { %>
+                    <tr>
+                        <td><%= coord.address %></td>
+                        <td><%= coord.date %></td>
+                        <td hidden><%= coord.latitude %></td>
+                        <td hidden><%= coord.longitude %></td>
+                    </tr>
+                <% }); %>
             </tbody>
         </table>
     </div>
 
-    <!-- script map -->
     <script>
-        const encodedData = '<%= Buffer.from(JSON.stringify(coordinates)).toString("base64") %>';
-        const coordinates = JSON.parse(atob(encodedData));
-
-        const map = L.map('map').setView([36.5665, 126.9780], 6);
-
+        // Initializing the public map
+        var map = L.map('map').setView([37.5665, 126.9780], 7);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            attribution: '© OpenStreetMap contributors'
         }).addTo(map);
 
-        coordinates.forEach(coord => {
-            if (coord.latitude && coord.longitude) {
-                const redMarkerIcon = L.icon({
-                    iconUrl: 'https://cdn.rawgit.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
-                    iconSize: [25, 41],
-                    iconAnchor: [12, 41],
-                    popupAnchor: [1, -34]
-                });
-                L.marker([coord.latitude, coord.longitude], {icon: redMarkerIcon}).addTo(map)
-                    .bindPopup(coord.address);
-            }
+        // Fetching coordinates data from the server using AJAX
+        fetch('/coordinates-data')
+            .then(response => response.json())
+            .then(data => {
+                const coordinates = data;
+
+                // Add the markers to the map (Red markers)
+                var marker, i;
+                for (i = 0; i < coordinates.length; i++) {
+                    marker = L.marker([coordinates[i].latitude, coordinates[i].longitude], {
+                        icon: L.icon({
+                            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+                            iconSize: [25, 41],
+                            iconAnchor: [12, 41]
+                        })
+                    }).addTo(map);
+                    marker.bindPopup("<b>" + coordinates[i].address + "</b><br>" + coordinates[i].date);
+                }
+
+                // Check if the browser supports navigator.geolocation
+                if ('geolocation' in navigator) {
+                    navigator.geolocation.getCurrentPosition(function (position) {
+                        L.marker([position.coords.latitude, position.coords.longitude], {
+                            icon: L.icon({
+                                iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
+                                iconSize: [25, 41],
+                                iconAnchor: [12, 41]
+                            })
+                        }).addTo(map)
+                        .bindPopup("현 위치");
+                    }, function (error) {
+                        console.error("Error obtaining geolocation:", error);
+                    });
+                } else {
+                    console.warn("Geolocation is not available in this browser.");
+                }
+
+            })
+            .catch(error => {
+                console.error('Error fetching coordinates data:', error);
+            });
+
+        // Add event listener to table rows
+        document.querySelectorAll("#locationTable tbody tr").forEach(row => {
+            row.addEventListener("click", function() {
+                const latitude = parseFloat(this.querySelector("td:nth-child(3)").textContent);
+                const longitude = parseFloat(this.querySelector("td:nth-child(4)").textContent);
+                
+                map.setView([latitude, longitude], 14); // Set map center to the clicked coordinate and set zoom level to 14
+            });
         });
 
-        let positionObj;
-
-        function accessToGeo(position) {
-            positionObj = {
-                latitude: position.coords.latitude,
-                longitude: position.coords.longitude
-            };
-            console.log(positionObj);
-
-            if (positionObj && positionObj.latitude && positionObj.longitude) {
-                L.marker([positionObj.latitude, positionObj.longitude]).addTo(map)
-                    .bindPopup("현위치");
-            }
-        }
-
-        navigator.geolocation.getCurrentPosition(accessToGeo);
-
-        document.getElementById('locationTable').addEventListener('click', function(event) {
-            const target = event.target;
-            if (target && (target.nodeName === 'TD' || target.nodeName === 'TH')) {
-                const row = target.parentNode;
-                const lat = parseFloat(row.children[2].innerText);
-                const lng = parseFloat(row.children[3].innerText);
-                map.setView([lat, lng], 15);
-            }
-        });
     </script>
 
-    <script>
-        document.getElementById('moveButton').addEventListener('click', function() {
-            window.location.href = '/report';
-        });
-    </script>
-
-
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
 </body>
+
 </html>

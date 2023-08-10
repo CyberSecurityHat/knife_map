@@ -5,11 +5,12 @@ const path = require('path');
 const Sequelize = require('sequelize');
 const process = require('process');
 const basename = path.basename(__filename);
-const env = process.env.NODE_ENV || 'development';
+const env = process.env.NODE_ENV || 'production';
 const config = require(__dirname + '/../config/config.json')[env];
 const db = {};
 
 const report = require('./report');
+const warnung = require('./warnung');
 
 let sequelize;
 if (config.use_env_variable) {
@@ -45,5 +46,9 @@ db.Sequelize = Sequelize;
 db.report = report;
 report.init(sequelize);
 report.associate(db);
+
+db.warnung = warnung;
+warnung.init(sequelize);
+warnung.associate(db);
 
 module.exports = db;
