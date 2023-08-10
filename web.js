@@ -30,17 +30,17 @@ app.use(express.urlencoded({ extended: true }));
 
 
 const validateReportRequest = [
-  body('option').notEmpty.withMessage('버튼 옵션은 필수 선택 사항입니다.'),
-  body('location').notEmpty.withMessage('지역 기입은 필수 사항입니다.'),
-  body('year').notEmpty.withMessage('연도 선택은 필수 사항입니다.'),
-  body('month').notEmpty.withMessage('월 선택은 필수 사항입니다.'),
-  body('day').notEmpty.withMessage('일 선택은 필수 사항입니다.'),
-  body('sourceUrl').notEmpty.withMessage('출처 URL 기입은 필수 사항입니다.'),
+  body('option').notEmpty().withMessage('버튼 옵션은 필수 선택 사항입니다.'),
+  body('location').notEmpty().withMessage('지역 기입은 필수 사항입니다.'),
+  body('year').notEmpty().withMessage('연도 선택은 필수 사항입니다.'),
+  body('month').notEmpty().withMessage('월 선택은 필수 사항입니다.'),
+  body('day').notEmpty().withMessage('일 선택은 필수 사항입니다.'),
+  body('sourceUrl').notEmpty().withMessage('출처 URL 기입은 필수 사항입니다.'),
   body('location').isLength({ min: 1, max: 50}).withMessage('비정상적인 글자 길이는 허용하지 않습니다.'),
   body('year').isLength({min: 4, max: 4}).withMessage('비정상적인 글자 길이는 허용하지 않습니다.'),
   body('month').isInt({min: 1, max: 12}).withMessage('비정상적인 글자 길이는 허용하지 않습니다.'), //제대로 걸러지는지 확인해봐야됨
-  body('day').isLength({min: 2, max: 2}).withMessage('비정상적인 글자 길이는 허용하지 않습니다.'),
-  body('sourceUrl').isURL().withMessage('비정상적인 글자 길이는 허용하지 않습니다.'),
+  body('day').isInt({min: 1, max: 31}).withMessage('비정상적인 글자 길이는 허용하지 않습니다.'),
+  body('sourceUrl').isURL().withMessage('비정상적인 URL값은 허용하지 않습니다.'),
 ]
 
 
