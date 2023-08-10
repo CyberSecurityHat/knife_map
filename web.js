@@ -8,20 +8,17 @@ const path = require('path');
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
-const filePath = path.join(__dirname, 'coordinate.json');
+const filePath = path.join(__dirname, 'data/coordinate.json');
 
 const port = 8001;
 
 app.use(express.static('public'));
 
-
-
 app.get('/', (req, res) => {
   const data = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+
   res.render('index', { coordinates: data });
 });
-
-
 
 app.listen(port, () => {
     
